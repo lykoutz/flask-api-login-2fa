@@ -1,0 +1,45 @@
+version: '3.5'
+
+networks:
+  default:
+      name: registration_login_api_network
+
+volumes:
+  db:
+    driver: local
+
+services:
+  postgres.registration_login_api:
+    container_name: postgres.registration_login_api
+    hostname: postgres.registration_login_api
+    labels:
+      NAME: postgres.registration_login_api
+    restart: unless-stopped
+    image: postgres.registration_login_api:latest
+    build:
+      context: ./postgres
+      dockerfile: Dockerfile
+    environment:
+      - POSTGRES_DB=frla_db
+      - POSTGRES_USER=frla_user
+      - POSTGRES_PASSWORD=frla_pwd
+    ports:
+      - "5432"
+
+  flask.registration_login_api:
+    container_name: flask.registration_login_api
+    hostname: flask.registration_login_api
+    labels:
+      NAME: flask.registration_login_api
+    restart: unless-stopped
+    image: flask.registration_login_api:latest
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    ports:
+      - "5000:5000"
+    depends_on:
+      - postgres.registration_login_api
+    volumes:
+      - ./:/webapp
+    command: "flask run --host=0.0.0.0"
